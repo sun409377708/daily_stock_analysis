@@ -1,0 +1,552 @@
+diff --git a/api/v1/schemas/portfolio.py b/api/v1/schemas/portfolio.py
+index a1a75427..0c1a409a 100644
+--- a/api/v1/schemas/portfolio.py
++++ b/api/v1/schemas/portfolio.py
+@@ -151,6 +151,7 @@ class PortfolioCorporateActionListResponse(BaseModel):
+ 
+ class PortfolioPositionItem(BaseModel):
+     symbol: str
++    name: str = ""
+     market: str
+     currency: str
+     quantity: float
+diff --git a/apps/dsa-web/src/locales/featureText.ts b/apps/dsa-web/src/locales/featureText.ts
+index 6b6d6a9c..631d14ca 100644
+--- a/apps/dsa-web/src/locales/featureText.ts
++++ b/apps/dsa-web/src/locales/featureText.ts
+@@ -60,8 +60,8 @@ export const ALERT_MARKET_REGION_OPTIONS: Record<UiLanguage, Array<Option<Market
+ export const ALERT_MARKET_LIGHT_STATUS_OPTIONS: Record<UiLanguage, Array<Option<MarketLightStatus>>> = { zh: [{ value: 'red', label: '红灯' }, { value: 'yellow', label: '黄灯' }], en: [{ value: 'red', label: 'Red' }, { value: 'yellow', label: 'Yellow' }] };
+ 
+ export const PORTFOLIO_TEXT = {
+-  zh: { documentTitle: '持仓分析 - DSA', title: '持仓管理', description: '组合快照、手工录入、CSV 导入与风险分析（支持全组合 / 单账户切换）', accountView: '账户视图', allAccounts: '全部账户', costMethod: '成本口径', fifo: '先进先出（FIFO）', avg: '均价成本（AVG）', collapseCreate: '收起新建', createAccount: '新建账户', deleteAccount: '删除账户', deletingAccount: '删除中...', deleteAccountTitle: '删除持仓账户', deleteAccountConfirm: '确认删除', deleteAccountMessage: '确认删除账户 {name}（#{id}）吗？删除后该账户会从默认列表、快照、风险和录入入口隐藏；历史流水不会物理删除。', refreshing: '刷新中...', refreshData: '刷新数据', noAccounts: '还没有可用账户，请先创建账户后再录入交易或导入 CSV。', riskDegraded: '风险模块降级', operationHint: '操作提示', analysisTask: '分析任务', snapshotPartialTitle: '组合估值限制', totalEquity: '总权益', totalMarketValue: '总市值', totalCash: '总现金', fxStatus: '汇率状态', refreshFx: '刷新汇率', stale: '过期', latest: '最新', fxRefreshResult: '汇率刷新结果', positionsTitle: '持仓明细', countItems: '共 {count} 项', noPositionsTitle: '当前无持仓数据', noPositionsDescription: '录入交易或导入 CSV 后，这里会展示按账户汇总的持仓明细。', account: '账户', code: '代码', quantity: '数量', avgCost: '均价', lastPrice: '现价', marketValue: '市值', unrealizedPnl: '未实现盈亏', returnPct: '收益率', action: '操作', submitting: '提交中', analyze: '分析', sectorConcentration: '行业集中度分布', positionConcentrationFallback: '行业数据暂不可用，当前展示个股集中度', noConcentrationTitle: '暂无集中度数据', noConcentrationDescription: '风险模块完成计算后，这里会展示行业或个股维度的集中度分布。', displayScope: '展示口径', sectorDimension: '行业维度', positionDimensionFallback: '个股维度（降级显示）', sectorAlert: '板块集中度告警', topWeight: 'Top1 权重', yes: '是', no: '否', writeBlocked: '当前处于“全部账户”视图。为避免误写，请先选择一个具体账户后再进行手工录入或 CSV 提交。', drawdownMonitor: '回撤监控', maxDrawdown: '最大回撤', currentDrawdown: '当前回撤', alert: '告警', stopLossWarning: '止损接近预警', triggeredCount: '触发数', nearCount: '接近数', scope: '口径', accountCount: '账户数', currency: '计价币种', costMethodShort: '成本法', aiRiskSignals: 'AI 风险信号', aiRiskUnavailable: '信号风险暂不可用', aiRiskTotal: '风险信号', sellSignals: '卖出', reduceSignals: '减仓', alertSignals: '预警', noAiRiskSignals: '暂无防御型信号' },
+-  en: { documentTitle: 'Portfolio Analysis - DSA', title: 'Portfolio management', description: 'Portfolio snapshots, manual entries, CSV import, and risk analysis with full-portfolio or single-account views', accountView: 'Account view', allAccounts: 'All accounts', costMethod: 'Cost method', fifo: 'FIFO', avg: 'Average cost', collapseCreate: 'Collapse', createAccount: 'New account', deleteAccount: 'Delete account', deletingAccount: 'Deleting...', deleteAccountTitle: 'Delete portfolio account', deleteAccountConfirm: 'Delete account', deleteAccountMessage: 'Delete account {name} (#{id})? It will be hidden from default lists, snapshots, risk views, and entry forms; historical ledger rows are not physically deleted.', refreshing: 'Refreshing...', refreshData: 'Refresh data', noAccounts: 'No accounts are available. Create an account before entering trades or importing CSV files.', riskDegraded: 'Risk module degraded', operationHint: 'Operation hint', analysisTask: 'Analysis task', snapshotPartialTitle: 'Portfolio valuation limitations', totalEquity: 'Total equity', totalMarketValue: 'Total market value', totalCash: 'Total cash', fxStatus: 'FX status', refreshFx: 'Refresh FX', stale: 'Stale', latest: 'Current', fxRefreshResult: 'FX refresh result', positionsTitle: 'Positions', countItems: '{count} items', noPositionsTitle: 'No positions', noPositionsDescription: 'After you enter trades or import CSV data, account-level positions appear here.', account: 'Account', code: 'Code', quantity: 'Quantity', avgCost: 'Avg cost', lastPrice: 'Last price', marketValue: 'Market value', unrealizedPnl: 'Unrealized P/L', returnPct: 'Return', action: 'Action', submitting: 'Submitting', analyze: 'Analyze', sectorConcentration: 'Sector concentration', positionConcentrationFallback: 'Sector data unavailable; showing position concentration', noConcentrationTitle: 'No concentration data', noConcentrationDescription: 'Sector or position concentration appears after the risk module finishes.', displayScope: 'Display scope', sectorDimension: 'Sector', positionDimensionFallback: 'Position fallback', sectorAlert: 'Sector concentration alert', topWeight: 'Top1 weight', yes: 'Yes', no: 'No', writeBlocked: 'You are viewing all accounts. Select a specific account before manual entry or CSV submission to avoid writing to the wrong scope.', drawdownMonitor: 'Drawdown monitor', maxDrawdown: 'Max drawdown', currentDrawdown: 'Current drawdown', alert: 'Alert', stopLossWarning: 'Stop-loss proximity warning', triggeredCount: 'Triggered', nearCount: 'Near', scope: 'Scope', accountCount: 'Accounts', currency: 'Quote currency', costMethodShort: 'Cost method', aiRiskSignals: 'AI risk signals', aiRiskUnavailable: 'Signal risk unavailable', aiRiskTotal: 'Risk signals', sellSignals: 'Sell', reduceSignals: 'Reduce', alertSignals: 'Alert', noAiRiskSignals: 'No defensive signals' },
++  zh: { documentTitle: '持仓分析 - DSA', title: '持仓管理', description: '组合快照、手工录入、CSV 导入与风险分析（支持全组合 / 单账户切换）', accountView: '账户视图', allAccounts: '全部账户', costMethod: '成本口径', fifo: '先进先出（FIFO）', avg: '均价成本（AVG）', collapseCreate: '收起新建', createAccount: '新建账户', deleteAccount: '删除账户', deletingAccount: '删除中...', deleteAccountTitle: '删除持仓账户', deleteAccountConfirm: '确认删除', deleteAccountMessage: '确认删除账户 {name}（#{id}）吗？删除后该账户会从默认列表、快照、风险和录入入口隐藏；历史流水不会物理删除。', refreshing: '刷新中...', refreshData: '刷新数据', noAccounts: '还没有可用账户，请先创建账户后再录入交易或导入 CSV。', riskDegraded: '风险模块降级', operationHint: '操作提示', analysisTask: '分析任务', snapshotPartialTitle: '组合估值限制', totalEquity: '总权益', totalMarketValue: '总市值', totalCash: '总现金', fxStatus: '汇率状态', refreshFx: '刷新汇率', stale: '过期', latest: '最新', fxRefreshResult: '汇率刷新结果', positionsTitle: '持仓明细', countItems: '共 {count} 项', noPositionsTitle: '当前无持仓数据', noPositionsDescription: '录入交易或导入 CSV 后，这里会展示按账户汇总的持仓明细。', account: '账户', code: '代码', nameAndCode: '名称/代码', quantity: '数量', avgCost: '均价', lastPrice: '现价', marketValue: '市值', unrealizedPnl: '未实现盈亏', returnPct: '收益率', action: '操作', submitting: '提交中', analyze: '分析', sectorConcentration: '行业集中度分布', positionConcentrationFallback: '行业数据暂不可用，当前展示个股集中度', noConcentrationTitle: '暂无集中度数据', noConcentrationDescription: '风险模块完成计算后，这里会展示行业或个股维度的集中度分布。', displayScope: '展示口径', sectorDimension: '行业维度', positionDimensionFallback: '个股维度（降级显示）', sectorAlert: '板块集中度告警', topWeight: 'Top1 权重', yes: '是', no: '否', writeBlocked: '当前处于“全部账户”视图。为避免误写，请先选择一个具体账户后再进行手工录入或 CSV 提交。', drawdownMonitor: '回撤监控', maxDrawdown: '最大回撤', currentDrawdown: '当前回撤', alert: '告警', stopLossWarning: '止损接近预警', triggeredCount: '触发数', nearCount: '接近数', scope: '口径', accountCount: '账户数', currency: '计价币种', costMethodShort: '成本法', aiRiskSignals: 'AI 风险信号', aiRiskUnavailable: '信号风险暂不可用', aiRiskTotal: '风险信号', sellSignals: '卖出', reduceSignals: '减仓', alertSignals: '预警', noAiRiskSignals: '暂无防御型信号' },
++  en: { documentTitle: 'Portfolio Analysis - DSA', title: 'Portfolio management', description: 'Portfolio snapshots, manual entries, CSV import, and risk analysis with full-portfolio or single-account views', accountView: 'Account view', allAccounts: 'All accounts', costMethod: 'Cost method', fifo: 'FIFO', avg: 'Average cost', collapseCreate: 'Collapse', createAccount: 'New account', deleteAccount: 'Delete account', deletingAccount: 'Deleting...', deleteAccountTitle: 'Delete portfolio account', deleteAccountConfirm: 'Delete account', deleteAccountMessage: 'Delete account {name} (#{id})? It will be hidden from default lists, snapshots, risk views, and entry forms; historical ledger rows are not physically deleted.', refreshing: 'Refreshing...', refreshData: 'Refresh data', noAccounts: 'No accounts are available. Create an account before entering trades or importing CSV files.', riskDegraded: 'Risk module degraded', operationHint: 'Operation hint', analysisTask: 'Analysis task', snapshotPartialTitle: 'Portfolio valuation limitations', totalEquity: 'Total equity', totalMarketValue: 'Total market value', totalCash: 'Total cash', fxStatus: 'FX status', refreshFx: 'Refresh FX', stale: 'Stale', latest: 'Current', fxRefreshResult: 'FX refresh result', positionsTitle: 'Positions', countItems: '{count} items', noPositionsTitle: 'No positions', noPositionsDescription: 'After you enter trades or import CSV data, account-level positions appear here.', account: 'Account', code: 'Code', nameAndCode: 'Name / code', quantity: 'Quantity', avgCost: 'Avg cost', lastPrice: 'Last price', marketValue: 'Market value', unrealizedPnl: 'Unrealized P/L', returnPct: 'Return', action: 'Action', submitting: 'Submitting', analyze: 'Analyze', sectorConcentration: 'Sector concentration', positionConcentrationFallback: 'Sector data unavailable; showing position concentration', noConcentrationTitle: 'No concentration data', noConcentrationDescription: 'Sector or position concentration appears after the risk module finishes.', displayScope: 'Display scope', sectorDimension: 'Sector', positionDimensionFallback: 'Position fallback', sectorAlert: 'Sector concentration alert', topWeight: 'Top1 weight', yes: 'Yes', no: 'No', writeBlocked: 'You are viewing all accounts. Select a specific account before manual entry or CSV submission to avoid writing to the wrong scope.', drawdownMonitor: 'Drawdown monitor', maxDrawdown: 'Max drawdown', currentDrawdown: 'Current drawdown', alert: 'Alert', stopLossWarning: 'Stop-loss proximity warning', triggeredCount: 'Triggered', nearCount: 'Near', scope: 'Scope', accountCount: 'Accounts', currency: 'Quote currency', costMethodShort: 'Cost method', aiRiskSignals: 'AI risk signals', aiRiskUnavailable: 'Signal risk unavailable', aiRiskTotal: 'Risk signals', sellSignals: 'Sell', reduceSignals: 'Reduce', alertSignals: 'Alert', noAiRiskSignals: 'No defensive signals' },
+ } as const;
+ export const PORTFOLIO_SIDE_LABELS: Record<UiLanguage, Record<PortfolioSide, string>> = { zh: { buy: '买入', sell: '卖出' }, en: { buy: 'Buy', sell: 'Sell' } };
+ export const PORTFOLIO_CASH_DIRECTION_LABELS: Record<UiLanguage, Record<PortfolioCashDirection, string>> = { zh: { in: '流入', out: '流出' }, en: { in: 'Inflow', out: 'Outflow' } };
+diff --git a/apps/dsa-web/src/pages/PortfolioPage.tsx b/apps/dsa-web/src/pages/PortfolioPage.tsx
+index cf669ebb..4f22b168 100644
+--- a/apps/dsa-web/src/pages/PortfolioPage.tsx
++++ b/apps/dsa-web/src/pages/PortfolioPage.tsx
+@@ -62,6 +62,12 @@ const FALLBACK_BROKERS: PortfolioImportBrokerItem[] = [
+   { broker: 'cmb', aliases: ['cmbchina', 'zhaoshang'], displayName: '招商' },
+ ];
+ 
++function getPositionDisplayName(row: PortfolioPositionItem): string {
++  const name = String(row.name ?? '').trim();
++  const symbol = String(row.symbol ?? '').trim();
++  return name && name !== symbol ? name : '';
++}
++
+ type AccountOption = 'all' | number;
+ type EventType = 'trade' | 'cash' | 'corporate';
+ 
+@@ -1203,7 +1209,7 @@ const PortfolioPage: React.FC = () => {
+                 <thead className="text-xs text-secondary border-b border-white/10">
+                   <tr>
+                     <th className="text-left py-2 pr-2">{text.account}</th>
+-                    <th className="text-left py-2 pr-2">{text.code}</th>
++                    <th className="text-left py-2 pr-2">{text.nameAndCode}</th>
+                     <th className="text-right py-2 pr-2">{text.quantity}</th>
+                     <th className="text-right py-2 pr-2">{text.avgCost}</th>
+                     <th className="text-right py-2 pr-2">{text.lastPrice}</th>
+@@ -1222,7 +1228,16 @@ const PortfolioPage: React.FC = () => {
+                     return (
+                     <tr key={rowKey} className="border-b border-white/5">
+                       <td className="py-2 pr-2 text-secondary">{row.accountName}</td>
+-                      <td className="py-2 pr-2 font-mono text-foreground">{row.symbol}</td>
++                      <td className="py-2 pr-2">
++                        {getPositionDisplayName(row) ? (
++                          <div className="max-w-[10rem] truncate font-medium text-foreground" title={getPositionDisplayName(row)}>
++                            {getPositionDisplayName(row)}
++                          </div>
++                        ) : null}
++                        <div className={getPositionDisplayName(row) ? 'font-mono text-xs text-secondary' : 'font-mono text-foreground'}>
++                          {row.symbol}
++                        </div>
++                      </td>
+                       <td className="py-2 pr-2 text-right">{row.quantity.toFixed(2)}</td>
+                       <td className="py-2 pr-2 text-right">{row.avgCost.toFixed(4)}</td>
+                       <td className="py-2 pr-2 text-right">
+diff --git a/apps/dsa-web/src/pages/__tests__/PortfolioPage.test.tsx b/apps/dsa-web/src/pages/__tests__/PortfolioPage.test.tsx
+index b97a62cc..959cb999 100644
+--- a/apps/dsa-web/src/pages/__tests__/PortfolioPage.test.tsx
++++ b/apps/dsa-web/src/pages/__tests__/PortfolioPage.test.tsx
+@@ -551,7 +551,7 @@ describe('PortfolioPage FX refresh', () => {
+ 
+   it('renders backend-provided position valuation fields and stale missing-price hint', async () => {
+     getSnapshot.mockResolvedValueOnce(makeSnapshot({ fxStale: true, positions: [
+-      { symbol: 'HK00700', market: 'hk', currency: 'HKD', quantity: 10, avgCost: 400, totalCost: 4000, lastPrice: 420, marketValueBase: 4200, unrealizedPnlBase: 200, unrealizedPnlPct: 5, valuationCurrency: 'HKD', priceSource: 'history_close', priceDate: '2026-03-18', priceStale: true, priceAvailable: true },
++      { symbol: 'HK00700', name: '腾讯控股', market: 'hk', currency: 'HKD', quantity: 10, avgCost: 400, totalCost: 4000, lastPrice: 420, marketValueBase: 4200, unrealizedPnlBase: 200, unrealizedPnlPct: 5, valuationCurrency: 'HKD', priceSource: 'history_close', priceDate: '2026-03-18', priceStale: true, priceAvailable: true },
+       { symbol: 'AAPL', market: 'us', currency: 'USD', quantity: 5, avgCost: 100, totalCost: 500, lastPrice: 0, marketValueBase: 0, unrealizedPnlBase: 0, unrealizedPnlPct: null, valuationCurrency: 'USD', priceSource: 'missing', priceDate: null, priceStale: true, priceAvailable: false },
+     ] }));
+ 
+@@ -560,6 +560,7 @@ describe('PortfolioPage FX refresh', () => {
+     await waitForInitialLoad();
+ 
+     expect(await screen.findByText('HK00700')).toBeInTheDocument();
++    expect(screen.getByText('腾讯控股')).toBeInTheDocument();
+     expect(screen.getByText('420.0000')).toBeInTheDocument();
+     expect(screen.getByText('HKD 4,200.00')).toBeInTheDocument();
+     expect(screen.getByText('+5.00%')).toBeInTheDocument();
+diff --git a/apps/dsa-web/src/types/portfolio.ts b/apps/dsa-web/src/types/portfolio.ts
+index 654249e9..399c3844 100644
+--- a/apps/dsa-web/src/types/portfolio.ts
++++ b/apps/dsa-web/src/types/portfolio.ts
+@@ -31,6 +31,7 @@ export interface PortfolioAccountCreateRequest {
+ 
+ export interface PortfolioPositionItem {
+   symbol: string;
++  name?: string | null;
+   market: string;
+   currency: string;
+   quantity: number;
+diff --git a/main.py b/main.py
+index b8cf6d34..d9194215 100644
+--- a/main.py
++++ b/main.py
+@@ -1235,6 +1235,7 @@ def start_api_server(host: str, port: int, config: Config) -> None:
+ 
+     probe = socket.socket(socket.AF_INET6 if ":" in host else socket.AF_INET, socket.SOCK_STREAM)
+     try:
++        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+         probe.bind((host, port))
+     except OSError as exc:
+         raise RuntimeError(f"FastAPI port is not available: {host}:{port}") from exc
+diff --git a/scripts/deploy_aliyun_upgrade.sh b/scripts/deploy_aliyun_upgrade.sh
+new file mode 100755
+index 00000000..d44a2953
+--- /dev/null
++++ b/scripts/deploy_aliyun_upgrade.sh
+@@ -0,0 +1,176 @@
++#!/usr/bin/env bash
++set -euo pipefail
++
++ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++
++DSA_SERVER_HOST="${DSA_SERVER_HOST:-8.130.132.215}"
++DSA_SERVER_USER="${DSA_SERVER_USER:-root}"
++DSA_SERVER_PORT="${DSA_SERVER_PORT:-22}"
++DSA_SERVER_PATH="${DSA_SERVER_PATH:-/opt/daily-stock-analysis}"
++DSA_SERVICE_NAME="${DSA_SERVICE_NAME:-daily-stock-analysis}"
++DSA_HEALTH_URL="${DSA_HEALTH_URL:-https://stock.jianqin.fun/api/health}"
++DSA_BACKUP_DIR="${DSA_BACKUP_DIR:-/opt/backups}"
++DSA_ALLOW_DIRTY="${DSA_ALLOW_DIRTY:-1}"
++DSA_SKIP_PULL="${DSA_SKIP_PULL:-1}"
++DSA_SKIP_FRONTEND_BUILD="${DSA_SKIP_FRONTEND_BUILD:-0}"
++
++ssh_cmd=(ssh -p "$DSA_SERVER_PORT" -o StrictHostKeyChecking=no -o ConnectTimeout=10)
++rsync_ssh=(ssh -p "$DSA_SERVER_PORT" -o StrictHostKeyChecking=no)
++
++if [[ -n "${DSA_SSH_PASS:-}" ]]; then
++  if ! command -v sshpass >/dev/null 2>&1; then
++    echo "DSA_SSH_PASS is set, but sshpass is not installed." >&2
++    exit 1
++  fi
++  ssh_cmd=(sshpass -p "$DSA_SSH_PASS" "${ssh_cmd[@]}")
++  rsync_ssh=(sshpass -p "$DSA_SSH_PASS" "${rsync_ssh[@]}")
++fi
++
++remote="${DSA_SERVER_USER}@${DSA_SERVER_HOST}"
++
++run_remote() {
++  "${ssh_cmd[@]}" "$remote" "$@"
++}
++
++echo "Repository: $ROOT_DIR"
++echo "Target: ${remote}:${DSA_SERVER_PATH}"
++
++cd "$ROOT_DIR"
++
++if [[ "$DSA_SKIP_PULL" != "1" ]]; then
++  git fetch --tags origin
++  if [[ -n "$(git status --porcelain)" && "$DSA_ALLOW_DIRTY" != "1" ]]; then
++    echo "Working tree is dirty. Set DSA_ALLOW_DIRTY=1 to deploy current local changes." >&2
++    git status --short
++    exit 1
++  fi
++  git pull --ff-only
++else
++  echo "Skipping git pull. Set DSA_SKIP_PULL=0 after reapplying local patches if you want the script to pull."
++fi
++
++echo "Running Python compile checks..."
++PYTHON_BIN="${PYTHON_BIN:-$ROOT_DIR/.venv/bin/python}"
++if [[ ! -x "$PYTHON_BIN" ]]; then
++  PYTHON_BIN="${PYTHON_BIN_FALLBACK:-python3}"
++fi
++PYTHONPYCACHEPREFIX=/tmp/dsa-pycache "$PYTHON_BIN" -m py_compile \
++  main.py \
++  server.py \
++  api/app.py \
++  api/v1/endpoints/analysis.py \
++  api/v1/endpoints/screening.py \
++  api/v1/schemas/portfolio.py \
++  src/config.py \
++  src/storage.py \
++  src/services/portfolio_risk_service.py \
++  src/services/portfolio_service.py \
++  src/services/screening_service.py
++
++if [[ "$DSA_SKIP_FRONTEND_BUILD" != "1" ]]; then
++  echo "Building frontend..."
++  (cd apps/dsa-web && npm ci && npm run lint && npm run build)
++fi
++
++echo "Creating server backup..."
++backup_name="daily-stock-analysis-$(date +%Y%m%d-%H%M%S).tgz"
++run_remote "set -e
++mkdir -p '$DSA_BACKUP_DIR'
++tar --exclude='$DSA_SERVER_PATH/venv' \
++    --exclude='$DSA_SERVER_PATH/.venv' \
++    --exclude='$DSA_SERVER_PATH/apps/dsa-web/node_modules' \
++    -czf '$DSA_BACKUP_DIR/$backup_name' \
++    -C '$(dirname "$DSA_SERVER_PATH")' '$(basename "$DSA_SERVER_PATH")'
++ls -lh '$DSA_BACKUP_DIR/$backup_name'"
++
++echo "Syncing source and static assets..."
++rsync -az --delete \
++  --exclude='.git/' \
++  --exclude='/.env' \
++  --exclude='/data/' \
++  --exclude='/reports/' \
++  --exclude='/logs/' \
++  --exclude='/venv/' \
++  --exclude='/.venv/' \
++  --exclude='/apps/dsa-web/node_modules/' \
++  --exclude='__pycache__/' \
++  --exclude='*.pyc' \
++  -e "${rsync_ssh[*]}" \
++  "$ROOT_DIR/" "$remote:$DSA_SERVER_PATH/"
++
++echo "Installing server dependencies and runtime SQLite shim..."
++run_remote "set -e
++cd '$DSA_SERVER_PATH'
++cat >/tmp/dsa-constraints.txt <<'EOF'
++numpy==1.26.4
++pandas==2.2.3
++Pillow==10.4.0
++greenlet==3.0.3
++Cython<3.2
++EOF
++./venv/bin/pip install -c /tmp/dsa-constraints.txt -r requirements.txt
++./venv/bin/pip install pysqlite3-binary
++sitepkg=\$(./venv/bin/python - <<'PY'
++import site
++print(site.getsitepackages()[0])
++PY
++)
++cat > \"\$sitepkg/sitecustomize.py\" <<'PY'
++\"\"\"Prefer pysqlite3-binary so SQLAlchemy sees a modern SQLite build.\"\"\"
++import sys
++try:
++    import pysqlite3
++except Exception:
++    pass
++else:
++    sys.modules[\"sqlite3\"] = pysqlite3
++PY
++if grep -q '^ALPHASIFT_ENABLED=true' .env && ! grep -q '^SCREENING_ENABLED=' .env; then
++  cp .env \".env.bak-screening-\$(date +%Y%m%d-%H%M%S)\"
++  printf '\\nSCREENING_ENABLED=true\\n' >> .env
++fi
++PYTHONPYCACHEPREFIX=/tmp/dsa-pycache ./venv/bin/python -m py_compile \
++  main.py \
++  server.py \
++  api/app.py \
++  api/v1/endpoints/analysis.py \
++  api/v1/endpoints/screening.py \
++  api/v1/schemas/portfolio.py \
++  src/config.py \
++  src/storage.py \
++  src/services/portfolio_risk_service.py \
++  src/services/portfolio_service.py \
++  src/services/screening_service.py
++./venv/bin/python - <<'PY'
++import sqlite3
++from src.config import get_config
++from src.storage import DatabaseManager
++conn = sqlite3.connect(':memory:')
++conn.create_function('x', 1, lambda x: x, deterministic=True)
++cfg = get_config()
++print('sqlite', sqlite3.__name__, sqlite3.sqlite_version)
++print('screening', getattr(cfg, 'screening_enabled', None))
++print('model', getattr(cfg, 'litellm_model', None))
++DatabaseManager()
++print('db ok')
++PY"
++
++echo "Restarting service..."
++run_remote "systemctl restart '$DSA_SERVICE_NAME' && systemctl is-active '$DSA_SERVICE_NAME'"
++
++echo "Checking health..."
++health_ok=0
++for attempt in {1..30}; do
++  if curl -fsS -k "$DSA_HEALTH_URL"; then
++    health_ok=1
++    break
++  fi
++  echo "Health check not ready yet (attempt $attempt/30); retrying in 3s..."
++  sleep 3
++done
++if [[ "$health_ok" != "1" ]]; then
++  echo "Health check failed after waiting." >&2
++  exit 1
++fi
++echo
++echo "Deployment finished. Backup: $DSA_BACKUP_DIR/$backup_name"
+diff --git a/scripts/patches/README.md b/scripts/patches/README.md
+new file mode 100644
+index 00000000..129a6678
+--- /dev/null
++++ b/scripts/patches/README.md
+@@ -0,0 +1,63 @@
++# Jianqin Local Overrides
++
++This directory stores local patches that are intentionally kept outside the
++upstream project history.
++
++## Patch
++
++- `jianqin-local-overrides.patch`
++
++Current contents:
++
++- FastAPI port probe uses `SO_REUSEADDR` for smoother systemd restarts.
++- Portfolio risk sector lookup uses concurrent resolution and a 24-hour
++  in-process cache.
++- Portfolio snapshot exposes a local-only `name` field for positions, and the
++  Web portfolio table displays name plus code without calling external name
++  providers during the snapshot request.
++
++## Reapply After Pulling Upstream
++
++From the repository root:
++
++```bash
++git fetch --tags origin
++git stash push -m before-upstream-upgrade -- .
++git pull --ff-only
++git apply --3way scripts/patches/jianqin-local-overrides.patch
++```
++
++Then run local validation and deploy:
++
++```bash
++PYTHONPYCACHEPREFIX=/tmp/dsa-pycache ./.venv/bin/python -m py_compile \
++  main.py api/v1/schemas/portfolio.py src/services/portfolio_service.py src/services/portfolio_risk_service.py
++
++cd apps/dsa-web
++npm ci
++npm run lint
++npm run build
++cd ../..
++
++DSA_SSH_PASS='your-server-password' DSA_SKIP_PULL=1 ./scripts/deploy_aliyun_upgrade.sh
++```
++
++## Refresh This Patch
++
++After changing the local overrides, regenerate the patch from the repository
++root:
++
++```bash
++git diff -- \
++  main.py \
++  src/services/portfolio_risk_service.py \
++  src/services/portfolio_service.py \
++  api/v1/schemas/portfolio.py \
++  apps/dsa-web/src/pages/PortfolioPage.tsx \
++  apps/dsa-web/src/types/portfolio.ts \
++  apps/dsa-web/src/locales/featureText.ts \
++  apps/dsa-web/src/pages/__tests__/PortfolioPage.test.tsx \
++  > scripts/patches/jianqin-local-overrides.patch
++```
++
++Do not put server passwords or API keys in patch files.
+diff --git a/src/services/portfolio_risk_service.py b/src/services/portfolio_risk_service.py
+index 0a37a8ee..1e069352 100644
+--- a/src/services/portfolio_risk_service.py
++++ b/src/services/portfolio_risk_service.py
+@@ -4,6 +4,9 @@
+ from __future__ import annotations
+ 
+ import logging
++import threading
++import time
++from concurrent.futures import ThreadPoolExecutor, as_completed
+ from datetime import date, timedelta
+ from typing import Any, Dict, List, Optional, Tuple
+ 
+@@ -16,6 +19,9 @@ from src.services.portfolio_service import PortfolioService
+ logger = logging.getLogger(__name__)
+ 
+ DEFENSIVE_DECISION_SIGNAL_ACTIONS = ("sell", "reduce", "alert")
++_SECTOR_CACHE_TTL_SECONDS = 24 * 60 * 60
++_SECTOR_CACHE_LOCK = threading.Lock()
++_SECTOR_CACHE: Dict[Tuple[str, str], Tuple[str, float]] = {}
+ 
+ 
+ class PortfolioRiskService:
+@@ -334,7 +340,7 @@ class PortfolioRiskService:
+             "failed_count": 0,
+         }
+         errors: List[str] = []
+-        board_cache: Dict[Tuple[str, str], str] = {}
++        position_exposures: List[Tuple[str, str, float]] = []
+ 
+         for account in snapshot.get("accounts", []):
+             for pos in account.get("positions", []):
+@@ -352,15 +358,38 @@ class PortfolioRiskService:
+                     as_of_date=as_of_date,
+                 )
+ 
+-                sector = self._resolve_primary_sector(
+-                    symbol=symbol,
+-                    market=market,
+-                    board_cache=board_cache,
+-                    coverage=coverage,
+-                    errors=errors,
+-                )
+-                sector_exposure[sector] = sector_exposure.get(sector, 0.0) + converted
+-                sector_symbols.setdefault(sector, set()).add(symbol)
++                position_exposures.append((symbol, market, converted))
++
++        sector_by_key: Dict[Tuple[str, str], str] = {}
++        unique_keys = sorted({(symbol, market) for symbol, market, _ in position_exposures})
++        if unique_keys:
++            max_workers = min(6, len(unique_keys))
++            with ThreadPoolExecutor(max_workers=max_workers) as executor:
++                futures = {
++                    executor.submit(self._resolve_primary_sector_value, symbol, market): (symbol, market)
++                    for symbol, market in unique_keys
++                }
++                for future in as_completed(futures):
++                    symbol, market = futures[future]
++                    try:
++                        sector, classified_inc, unclassified_inc, failed_inc, error = future.result()
++                    except Exception as exc:  # pragma: no cover - defensive fail-open
++                        sector = "UNCLASSIFIED"
++                        classified_inc = 0
++                        unclassified_inc = 1
++                        failed_inc = 1
++                        error = f"{symbol}: {exc}"
++                    sector_by_key[(symbol, market)] = sector
++                    coverage["classified_count"] += classified_inc
++                    coverage["unclassified_count"] += unclassified_inc
++                    coverage["failed_count"] += failed_inc
++                    if error:
++                        errors.append(error)
++
++        for symbol, market, converted in position_exposures:
++            sector = sector_by_key.get((symbol, market), "UNCLASSIFIED")
++            sector_exposure[sector] = sector_exposure.get(sector, 0.0) + converted
++            sector_symbols.setdefault(sector, set()).add(symbol)
+ 
+         rows = []
+         for sector, exposure in sector_exposure.items():
+@@ -386,6 +415,53 @@ class PortfolioRiskService:
+             "errors": errors[:20],
+         }
+ 
++    def _resolve_primary_sector_value(
++        self,
++        symbol: str,
++        market: str,
++    ) -> Tuple[str, int, int, int, Optional[str]]:
++        cache_key = (symbol, market)
++        cached = self._get_cached_sector(cache_key)
++        if cached is not None:
++            if cached == "UNCLASSIFIED":
++                return cached, 0, 1, 0, None
++            return cached, 1, 0, 0, None
++
++        if market != "cn":
++            self._store_cached_sector(cache_key, "UNCLASSIFIED")
++            return "UNCLASSIFIED", 0, 1, 0, None
++
++        try:
++            boards = self._fetch_belong_boards(symbol)
++            sector_name = self._pick_primary_board_name(boards)
++            if sector_name:
++                self._store_cached_sector(cache_key, sector_name)
++                return sector_name, 1, 0, 0, None
++        except Exception as exc:
++            self._store_cached_sector(cache_key, "UNCLASSIFIED")
++            return "UNCLASSIFIED", 0, 1, 1, f"{symbol}: {exc}"
++
++        self._store_cached_sector(cache_key, "UNCLASSIFIED")
++        return "UNCLASSIFIED", 0, 1, 0, None
++
++    @staticmethod
++    def _get_cached_sector(cache_key: Tuple[str, str]) -> Optional[str]:
++        now = time.time()
++        with _SECTOR_CACHE_LOCK:
++            cached = _SECTOR_CACHE.get(cache_key)
++            if cached is None:
++                return None
++            sector, expires_at = cached
++            if expires_at <= now:
++                _SECTOR_CACHE.pop(cache_key, None)
++                return None
++            return sector
++
++    @staticmethod
++    def _store_cached_sector(cache_key: Tuple[str, str], sector: str) -> None:
++        with _SECTOR_CACHE_LOCK:
++            _SECTOR_CACHE[cache_key] = (sector, time.time() + _SECTOR_CACHE_TTL_SECONDS)
++
+     def _resolve_primary_sector(
+         self,
+         *,
+diff --git a/src/services/portfolio_service.py b/src/services/portfolio_service.py
+index 1d64d782..3b7e9f3c 100644
+--- a/src/services/portfolio_service.py
++++ b/src/services/portfolio_service.py
+@@ -1045,6 +1045,7 @@ class PortfolioService:
+             if active_symbols
+             else None
+         )
++        position_names = self._resolve_position_names(symbol for symbol, _, _ in keys)
+ 
+         for key in sorted(keys):
+             symbol, market, currency = key
+@@ -1113,6 +1114,7 @@ class PortfolioService:
+             position_rows.append(
+                 {
+                     "symbol": symbol,
++                    "name": position_names.get(symbol) or "",
+                     "market": market,
+                     "currency": currency,
+                     "quantity": round(qty, 8),
+@@ -1138,6 +1140,29 @@ class PortfolioService:
+ 
+         return position_rows, lot_rows, market_value_base, total_cost_base, fx_stale
+ 
++    @staticmethod
++    def _resolve_position_names(symbols: Iterable[str]) -> Dict[str, str]:
++        unique_symbols = sorted({symbol for symbol in symbols if symbol})
++        if not unique_symbols:
++            return {}
++
++        from src.data.stock_index_loader import get_index_stock_name
++        from src.data.stock_mapping import STOCK_NAME_MAP, is_meaningful_stock_name
++
++        names: Dict[str, str] = {}
++        for symbol in unique_symbols:
++            static_name = STOCK_NAME_MAP.get(symbol)
++            if is_meaningful_stock_name(static_name, symbol):
++                names[symbol] = str(static_name)
++                continue
++
++            index_name = get_index_stock_name(symbol)
++            if is_meaningful_stock_name(index_name, symbol):
++                names[symbol] = str(index_name)
++
++        return names
++
++
+     def _resolve_position_price(
+         self,
+         *,

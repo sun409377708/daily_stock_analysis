@@ -4,6 +4,9 @@
 from __future__ import annotations
 
 import logging
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -16,6 +19,9 @@ from src.services.portfolio_service import PortfolioService
 logger = logging.getLogger(__name__)
 
 DEFENSIVE_DECISION_SIGNAL_ACTIONS = ("sell", "reduce", "alert")
+_SECTOR_CACHE_TTL_SECONDS = 24 * 60 * 60
+_SECTOR_CACHE_LOCK = threading.Lock()
+_SECTOR_CACHE: Dict[Tuple[str, str], Tuple[str, float]] = {}
 
 
 class PortfolioRiskService:
@@ -334,7 +340,7 @@ class PortfolioRiskService:
             "failed_count": 0,
         }
         errors: List[str] = []
-        board_cache: Dict[Tuple[str, str], str] = {}
+        position_exposures: List[Tuple[str, str, float]] = []
 
         for account in snapshot.get("accounts", []):
             for pos in account.get("positions", []):
@@ -352,15 +358,38 @@ class PortfolioRiskService:
                     as_of_date=as_of_date,
                 )
 
-                sector = self._resolve_primary_sector(
-                    symbol=symbol,
-                    market=market,
-                    board_cache=board_cache,
-                    coverage=coverage,
-                    errors=errors,
-                )
-                sector_exposure[sector] = sector_exposure.get(sector, 0.0) + converted
-                sector_symbols.setdefault(sector, set()).add(symbol)
+                position_exposures.append((symbol, market, converted))
+
+        sector_by_key: Dict[Tuple[str, str], str] = {}
+        unique_keys = sorted({(symbol, market) for symbol, market, _ in position_exposures})
+        if unique_keys:
+            max_workers = min(6, len(unique_keys))
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(self._resolve_primary_sector_value, symbol, market): (symbol, market)
+                    for symbol, market in unique_keys
+                }
+                for future in as_completed(futures):
+                    symbol, market = futures[future]
+                    try:
+                        sector, classified_inc, unclassified_inc, failed_inc, error = future.result()
+                    except Exception as exc:  # pragma: no cover - defensive fail-open
+                        sector = "UNCLASSIFIED"
+                        classified_inc = 0
+                        unclassified_inc = 1
+                        failed_inc = 1
+                        error = f"{symbol}: {exc}"
+                    sector_by_key[(symbol, market)] = sector
+                    coverage["classified_count"] += classified_inc
+                    coverage["unclassified_count"] += unclassified_inc
+                    coverage["failed_count"] += failed_inc
+                    if error:
+                        errors.append(error)
+
+        for symbol, market, converted in position_exposures:
+            sector = sector_by_key.get((symbol, market), "UNCLASSIFIED")
+            sector_exposure[sector] = sector_exposure.get(sector, 0.0) + converted
+            sector_symbols.setdefault(sector, set()).add(symbol)
 
         rows = []
         for sector, exposure in sector_exposure.items():
@@ -385,6 +414,53 @@ class PortfolioRiskService:
             "coverage": coverage,
             "errors": errors[:20],
         }
+
+    def _resolve_primary_sector_value(
+        self,
+        symbol: str,
+        market: str,
+    ) -> Tuple[str, int, int, int, Optional[str]]:
+        cache_key = (symbol, market)
+        cached = self._get_cached_sector(cache_key)
+        if cached is not None:
+            if cached == "UNCLASSIFIED":
+                return cached, 0, 1, 0, None
+            return cached, 1, 0, 0, None
+
+        if market != "cn":
+            self._store_cached_sector(cache_key, "UNCLASSIFIED")
+            return "UNCLASSIFIED", 0, 1, 0, None
+
+        try:
+            boards = self._fetch_belong_boards(symbol)
+            sector_name = self._pick_primary_board_name(boards)
+            if sector_name:
+                self._store_cached_sector(cache_key, sector_name)
+                return sector_name, 1, 0, 0, None
+        except Exception as exc:
+            self._store_cached_sector(cache_key, "UNCLASSIFIED")
+            return "UNCLASSIFIED", 0, 1, 1, f"{symbol}: {exc}"
+
+        self._store_cached_sector(cache_key, "UNCLASSIFIED")
+        return "UNCLASSIFIED", 0, 1, 0, None
+
+    @staticmethod
+    def _get_cached_sector(cache_key: Tuple[str, str]) -> Optional[str]:
+        now = time.time()
+        with _SECTOR_CACHE_LOCK:
+            cached = _SECTOR_CACHE.get(cache_key)
+            if cached is None:
+                return None
+            sector, expires_at = cached
+            if expires_at <= now:
+                _SECTOR_CACHE.pop(cache_key, None)
+                return None
+            return sector
+
+    @staticmethod
+    def _store_cached_sector(cache_key: Tuple[str, str], sector: str) -> None:
+        with _SECTOR_CACHE_LOCK:
+            _SECTOR_CACHE[cache_key] = (sector, time.time() + _SECTOR_CACHE_TTL_SECONDS)
 
     def _resolve_primary_sector(
         self,
