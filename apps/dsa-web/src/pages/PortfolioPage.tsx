@@ -64,6 +64,12 @@ const FALLBACK_BROKERS: PortfolioImportBrokerItem[] = [
   { broker: 'cmb', aliases: ['cmbchina', 'zhaoshang'], displayName: '招商' },
 ];
 
+function getPositionDisplayName(row: PortfolioPositionItem): string {
+  const name = String(row.name ?? '').trim();
+  const symbol = String(row.symbol ?? '').trim();
+  return name && name !== symbol ? name : '';
+}
+
 type AccountOption = 'all' | number;
 type EventType = 'trade' | 'cash' | 'corporate';
 
@@ -1732,7 +1738,7 @@ const PortfolioPage: React.FC = () => {
                 <thead className="text-xs text-secondary border-b border-white/10">
                   <tr>
                     <th className="text-left py-2 pr-2">{text.account}</th>
-                    <th className="text-left py-2 pr-2">{text.code}</th>
+                    <th className="text-left py-2 pr-2">{text.nameAndCode}</th>
                     <th className="text-right py-2 pr-2">{text.quantity}</th>
                     <th className="text-right py-2 pr-2">{text.avgCost}</th>
                     <th className="text-right py-2 pr-2">{text.lastPrice}</th>
@@ -1751,7 +1757,16 @@ const PortfolioPage: React.FC = () => {
                     return (
                     <tr key={rowKey} className="border-b border-white/5">
                       <td className="py-2 pr-2 text-secondary">{row.accountName}</td>
-                      <td className="py-2 pr-2 font-mono text-foreground">{row.symbol}</td>
+                      <td className="py-2 pr-2">
+                        {getPositionDisplayName(row) ? (
+                          <div className="max-w-[10rem] truncate font-medium text-foreground" title={getPositionDisplayName(row)}>
+                            {getPositionDisplayName(row)}
+                          </div>
+                        ) : null}
+                        <div className={getPositionDisplayName(row) ? 'font-mono text-xs text-secondary' : 'font-mono text-foreground'}>
+                          {row.symbol}
+                        </div>
+                      </td>
                       <td className="py-2 pr-2 text-right">{row.quantity.toFixed(2)}</td>
                       <td className="py-2 pr-2 text-right">{row.avgCost.toFixed(4)}</td>
                       <td className="py-2 pr-2 text-right">

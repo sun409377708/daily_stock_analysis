@@ -1049,6 +1049,7 @@ class PortfolioService:
             if active_symbols
             else None
         )
+        position_names = self._resolve_position_names(symbol for symbol, _, _ in keys)
 
         for key in sorted(keys):
             symbol, market, currency = key
@@ -1117,6 +1118,7 @@ class PortfolioService:
             position_rows.append(
                 {
                     "symbol": symbol,
+                    "name": position_names.get(symbol) or "",
                     "market": market,
                     "currency": currency,
                     "quantity": round(qty, 8),
@@ -1141,6 +1143,29 @@ class PortfolioService:
             total_cost_base += cost_base
 
         return position_rows, lot_rows, market_value_base, total_cost_base, fx_stale
+
+    @staticmethod
+    def _resolve_position_names(symbols: Iterable[str]) -> Dict[str, str]:
+        unique_symbols = sorted({symbol for symbol in symbols if symbol})
+        if not unique_symbols:
+            return {}
+
+        from src.data.stock_index_loader import get_index_stock_name
+        from src.data.stock_mapping import STOCK_NAME_MAP, is_meaningful_stock_name
+
+        names: Dict[str, str] = {}
+        for symbol in unique_symbols:
+            static_name = STOCK_NAME_MAP.get(symbol)
+            if is_meaningful_stock_name(static_name, symbol):
+                names[symbol] = str(static_name)
+                continue
+
+            index_name = get_index_stock_name(symbol)
+            if is_meaningful_stock_name(index_name, symbol):
+                names[symbol] = str(index_name)
+
+        return names
+
 
     def _resolve_position_price(
         self,

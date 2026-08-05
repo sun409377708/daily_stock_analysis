@@ -151,6 +151,7 @@ class PortfolioCorporateActionListResponse(BaseModel):
 
 class PortfolioPositionItem(BaseModel):
     symbol: str
+    name: str = ""
     market: str
     currency: str
     quantity: float
